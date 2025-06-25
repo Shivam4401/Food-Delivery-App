@@ -7,6 +7,8 @@ import { dataContext } from "../context/UserContext";
 import { RxCross2 } from "react-icons/rx";
 import Cart from "../components/Cart";
 import { useSelector } from "react-redux";
+import loadScript from "../utils/loadScript";
+import { toast } from "react-toastify";
 
 const Home = () => {
   // You can add filtering logic here if needed
@@ -27,6 +29,40 @@ const Home = () => {
       //   console.log(category);
       //   console.log(newFoods);
     }
+  };
+
+  const displayRazorpay = async () => {
+    const res = await loadScript(
+      "https://checkout.razorpay.com/v1/checkout.js"
+    );
+
+    if (!res) {
+      alert("Razorpay SDK failed to load. Are you online?");
+      return;
+    }
+
+    const options = {
+      key: "YOUR_KEY_ID",
+      amount: 50000,
+      currency: "INR",
+      name: "My Food Delivery App",
+      description: "Order Payment",
+      handler: function (response) {
+        alert("Payment successful!");
+        console.log(response);
+      },
+      prefill: {
+        name: "Shivam Poddar",
+        email: "shivam@example.com",
+        contact: "9999999999",
+      },
+      theme: {
+        color: "#00b894",
+      },
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
   };
 
   let items = useSelector((state) => state.cart);
@@ -158,6 +194,7 @@ const Home = () => {
                 <div
                   className="w-[88%] h-[38px] bg-green-500 text-white text-xl font-bold text-center rounded-lg cursor-pointer"
                   style={{ margin: "10px", padding: "3px" }}
+                  onClick={() => toast.success("Order placed successfully")}
                 >
                   Place Order
                 </div>
